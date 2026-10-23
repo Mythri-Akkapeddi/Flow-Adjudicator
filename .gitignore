@@ -1,0 +1,32 @@
+#Python
+.venv/  
+__pycache__/
+*.py[cod] 
+.pytest_cache/ 
+.ipynb_checkpoints/
+
+#Environment variables and secrets
+.env 
+.env.* 
+!.env.example
+
+#macOS
+.DS_Store
+
+#Jupyter
+.ipynb_checkpoints/
+
+#Raw and processed datasets (large files)
+data/raw/ 
+# data/interim/ 
+# data/processed/
+
+#Generated results
+# results/runs/ 
+# results/traces/ 
+# results/tables/ 
+# results/figures/
+
+#Model and temporary files
+*.log 
+*.tmp
