@@ -28,8 +28,17 @@ def fix_timestamps(raw: pd.Series) -> pd.Series:
         ts[bad] = pd.to_datetime(raw[bad], dayfirst=True, format="mixed", errors="coerce")
     return ts.where(ts.dt.hour >= 8, ts + pd.Timedelta(hours=12))
 
+def parse_timestamps(raw: pd.Series, mode: str) -> pd.Series:
+    """mode='original': d/m/Y without AM/PM (heuristic fix). mode='corrected': parse normally."""
+    if mode == "original":
+        return fix_timestamps(raw)
+    raw = raw.astype("string").str.strip()
+    old_style = raw.str.match(r"^\d{1,2}/\d{1,2}/\d{4}", na=False).mean() > 0.5
+    if old_style:
+        return fix_timestamps(raw)
+    return pd.to_datetime(raw, errors="coerce")
 
-def load_day(path: Path) -> tuple[pd.DataFrame, dict]:
+def load_day(path: Path, ts_mode: str = "original") -> tuple[pd.DataFrame, dict]:
     """Read one CSV, return (clean dataframe, stats dict)."""
     df = pd.read_csv(path, encoding="latin-1", low_memory=False)
     df.columns = [to_snake(c) for c in df.columns]
@@ -46,7 +55,7 @@ def load_day(path: Path) -> tuple[pd.DataFrame, dict]:
 
     # timestamps
     df["timestamp_raw"] = df["timestamp"].astype("string")
-    df["timestamp"] = fix_timestamps(df["timestamp"])
+    df["timestamp"] = parse_timestamps(df["timestamp"], ts_mode)
 
     # numerics (everything else): coerce, replace +-inf with NaN
     num_cols = [c for c in df.columns if c not in NON_NUMERIC_COLS and c != "timestamp_raw"]
