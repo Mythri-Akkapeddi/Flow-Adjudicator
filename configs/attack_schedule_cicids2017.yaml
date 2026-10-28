@@ -1,0 +1,27 @@
+# CIC-IDS2017 attack schedule. Times are the capture clock (ADT), 24-hour.
+# Transcribed from the UNB CIC-IDS2017 page ("Attacks" section).
+# VERIFY every row against https://www.unb.ca/cic/datasets/ids-2017.html
+# Attackers appear as 172.16.0.1 inside the capture (NAT'd Kali / LOIC hosts).
+tolerance_minutes: 15
+attacks:
+  # Tuesday 2017-07-04
+  - {id: tue_ftp,  date: "2017-07-04", family: ftp_bruteforce, name: "FTP-Patator", start: "09:20", end: "10:20", attackers: ["172.16.0.1"], victims: ["192.168.10.50"]}
+  - {id: tue_ssh,  date: "2017-07-04", family: ssh_bruteforce, name: "SSH-Patator", start: "14:00", end: "15:00", attackers: ["172.16.0.1"], victims: ["192.168.10.50"]}
+  # Wednesday 2017-07-05
+  - {id: wed_slowloris,     date: "2017-07-05", family: dos, name: "DoS slowloris",     start: "09:47", end: "10:10", attackers: ["172.16.0.1"], victims: ["192.168.10.50"]}
+  - {id: wed_slowhttptest,  date: "2017-07-05", family: dos, name: "DoS Slowhttptest",  start: "10:14", end: "10:35", attackers: ["172.16.0.1"], victims: ["192.168.10.50"]}
+  - {id: wed_hulk,          date: "2017-07-05", family: dos, name: "DoS Hulk",          start: "10:43", end: "11:00", attackers: ["172.16.0.1"], victims: ["192.168.10.50"]}
+  - {id: wed_goldeneye,     date: "2017-07-05", family: dos, name: "DoS GoldenEye",     start: "11:10", end: "11:23", attackers: ["172.16.0.1"], victims: ["192.168.10.50"]}
+  - {id: wed_heartbleed,    date: "2017-07-05", family: other, name: "Heartbleed",      start: "15:12", end: "15:32", attackers: ["172.16.0.1"], victims: ["192.168.10.51"]}
+  # Thursday 2017-07-06
+  - {id: thu_web_brute, date: "2017-07-06", family: web_attack, name: "Web Attack Brute Force", start: "09:20", end: "10:00", attackers: ["172.16.0.1"], victims: ["192.168.10.50"]}
+  - {id: thu_web_xss,   date: "2017-07-06", family: web_attack, name: "Web Attack XSS",         start: "10:15", end: "10:35", attackers: ["172.16.0.1"], victims: ["192.168.10.50"]}
+  - {id: thu_web_sqli,  date: "2017-07-06", family: web_attack, name: "Web Attack SQL Injection", start: "10:40", end: "10:42", attackers: ["172.16.0.1"], victims: ["192.168.10.50"]}
+  - {id: thu_infil_1,   date: "2017-07-06", family: other, name: "Infiltration (Meta exploit)",   start: "14:19", end: "14:21", attackers: ["205.174.165.73"], victims: ["192.168.10.8"]}
+  - {id: thu_infil_2,   date: "2017-07-06", family: other, name: "Infiltration (Meta exploit 2)", start: "14:33", end: "14:35", attackers: ["205.174.165.73"], victims: ["192.168.10.8"]}
+  - {id: thu_infil_3,   date: "2017-07-06", family: other, name: "Infiltration (Cool disk, MAC)", start: "14:53", end: "15:00", attackers: ["205.174.165.73"], victims: ["192.168.10.25"]}
+  - {id: thu_infil_4,   date: "2017-07-06", family: portscan, name: "Infiltration (Vista + portscan)", start: "15:04", end: "15:45", attackers: ["205.174.165.73"], victims: ["192.168.10.8"]}
+  # Friday 2017-07-07
+  - {id: fri_botnet,   date: "2017-07-07", family: botnet,   name: "Botnet ARES",  start: "10:02", end: "11:02", attackers: ["205.174.165.73"], victims: ["192.168.10.5", "192.168.10.8", "192.168.10.9", "192.168.10.14", "192.168.10.15"]}
+  - {id: fri_portscan, date: "2017-07-07", family: portscan, name: "PortScan (all nmap variants)", start: "13:55", end: "15:23", attackers: ["172.16.0.1"], victims: ["192.168.10.50"]}
+  - {id: fri_ddos,     date: "2017-07-07", family: ddos,     name: "DDoS LOIT",    start: "15:56", end: "16:16", attackers: ["172.16.0.1"], victims: ["192.168.10.50"]}
