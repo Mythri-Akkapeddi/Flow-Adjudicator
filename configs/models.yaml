@@ -3,7 +3,7 @@ local:
   name: "qwen3:4b"
   digest: "359d7dd4bcda"
   host: "http://localhost:11434"
-  context_length: 8192
+  num_ctx: 16384
   temperature: 0.3
   seed: 42
   think: false
