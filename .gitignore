@@ -1,32 +1,50 @@
-#Python
-.venv/  
+# ---- Python ----
+.venv/
 __pycache__/
-*.py[cod] 
-.pytest_cache/ 
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
 .ipynb_checkpoints/
 
-#Environment variables and secrets
-.env 
-.env.* 
+# ---- Secrets ----
+.env
+.env.*
 !.env.example
+.streamlit/secrets.toml
 
-#macOS
+# ---- macOS / editor ----
 .DS_Store
+.vscode/*
+!.vscode/settings.json
 
-#Jupyter
-.ipynb_checkpoints/
+# ---- Data (large, reproducible) ----
+data/raw/*
+data/interim/*
+data/processed/*
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+# data/cases/* is deliberately TRACKED (frozen test set + hash)
 
-#Raw and processed datasets (large files)
-data/raw/ 
-# data/interim/ 
-# data/processed/
+# ---- Big binary / generated files anywhere ----
+*.parquet
+*.duckdb
+*.duckdb.wal
+*.joblib
+*.pkl
+# ...except the tiny test fixture
+!tests/fixtures/mini_flows.parquet
 
-#Generated results
-# results/runs/ 
-# results/traces/ 
-# results/tables/ 
-# results/figures/
+# ---- Results: runs and traces ignored; tables and figures tracked ----
+results/runs/*
+results/traces/*
+!results/runs/.gitkeep
+!results/traces/.gitkeep
 
-#Model and temporary files
-*.log 
+# ---- Misc ----
+*.log
 *.tmp
