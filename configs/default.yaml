@@ -1,5 +1,8 @@
 seed: 42
 
+# Corrected CIC-IDS2017 timestamps are on a different clock than the original CSVs and the published attack schedule. Subtract this many hours to get the capture clock.
+corrected_clock_offset_hours: 3
+
 budget:
   max_llm_calls: 16
   max_tool_calls: 24
