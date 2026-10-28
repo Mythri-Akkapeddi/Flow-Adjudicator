@@ -1,0 +1,6 @@
+seed: 42
+
+budget:
+  max_llm_calls: 16
+  max_tool_calls: 24
+  max_total_tokens: 48000
