@@ -5,6 +5,7 @@ import pytest
 
 from flowadj.tools import traffic_tools  # noqa: F401  (importing registers the tools)
 from flowadj.tools.registry import ToolContext, ToolRunner, registry
+from flowadj.tools import tcp_tools  # noqa: F401
 
 START, END = "2017-07-07 14:00:00", "2017-07-07 15:00:00"
 
@@ -82,3 +83,44 @@ def test_all_registered_schemas_are_clean():
         f = registry.get(name).schema()["function"]
         assert "ctx" not in f["parameters"]["properties"]
         assert f["description"]
+
+
+# ---------- TCP tools ----------
+def test_failed_connection_rate(mini_db):
+    o = run(mini_db, "failed_connection_rate").output
+    assert o["n_tcp_flows"] == 360 and o["n_failed"] == 100
+    assert o["failed_rate"] == pytest.approx(100 / 360, abs=1e-3)
+    o = run(mini_db, "failed_connection_rate", {"host": "192.168.10.50"}).output
+    assert o["n_tcp_flows"] == 160 and o["n_failed"] == 100
+    o = run(mini_db, "failed_connection_rate", {"port": 22}).output
+    assert o["n_tcp_flows"] == 61 and o["n_failed"] == 1
+
+
+def test_syn_ack_ratio(mini_db):
+    o = run(mini_db, "syn_ack_ratio").output
+    assert o["syn_packets"] == 480 and o["ack_packets"] == 1100  # 200+100+60*3 / 200+0+60*15
+    assert o["syn_to_ack_ratio"] == pytest.approx(480 / 1100, abs=1e-3)
+    assert o["frac_syn_without_ack"] == pytest.approx(100 / 360, abs=1e-3)
+    assert o["frac_syn_no_reply"] == pytest.approx(100 / 360, abs=1e-3)
+
+
+def test_flag_counts(mini_db):
+    o = run(mini_db, "flag_counts").output
+    assert o["n_tcp_flows"] == 360
+    assert o["flags"]["rst"]["packets"] == 100
+    assert o["flags"]["rst"]["frac_flows_with_flag"] == pytest.approx(100 / 360, abs=1e-3)
+    assert o["flags"]["syn"]["packets"] == 480
+
+
+def test_rst_profile(mini_db):
+    o = run(mini_db, "rst_profile").output
+    assert o["n_rst_flows"] == 100
+    assert o["top_sources"][0]["ip"] == "172.16.0.1" and o["top_sources"][0]["n_rst_flows"] == 100
+    assert o["top_destinations"][0]["ip"] == "192.168.10.50"
+
+
+def test_short_flow_fraction(mini_db):
+    o = run(mini_db, "short_flow_fraction", {"max_packets": 3}).output
+    assert o["n_short_flows"] == 100
+    assert o["frac_short_flows"] == pytest.approx(100 / 360, abs=1e-3)
+    assert o["top_sources"][0]["ip"] == "172.16.0.1"
