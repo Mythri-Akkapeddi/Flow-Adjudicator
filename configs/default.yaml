@@ -7,3 +7,34 @@ budget:
   max_llm_calls: 16
   max_tool_calls: 24
   max_total_tokens: 48000
+
+splits:
+  block_minutes: 10
+  buffer_minutes: 2
+  min_attack_flows_per_block: 10
+  dev_fraction: 0.20
+  test_fraction: 0.35
+
+detector:
+  rf_trees: 100
+  rf_max_per_class: 60000
+  if_trees: 100
+  if_fit_rows: 200000
+  if_ref_rows: 200000
+  if_alert_percentile: 99.5
+  rf_alert_threshold: 0.5
+  chunk_rows: 250000
+
+
+cases:
+  cluster_gap_s: 120
+  min_alerts: 3
+  pad_s: 60              # must be <= splits.buffer_minutes * 60
+  min_purity: 0.8
+  share_threshold: 0.05
+  max_entities: 10
+  many_ports: 50
+  max_per_block: 2
+  dev: {attack: 10, benign: 5}
+  test: {attack: 30, benign: 15}
+  exclude_flags: [benign_during_scheduled_attack, attack_traffic_elsewhere_in_window, attacker_victim_overlap]
