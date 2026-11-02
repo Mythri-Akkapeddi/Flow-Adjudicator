@@ -124,3 +124,65 @@ def test_short_flow_fraction(mini_db):
     assert o["n_short_flows"] == 100
     assert o["frac_short_flows"] == pytest.approx(100 / 360, abs=1e-3)
     assert o["top_sources"][0]["ip"] == "172.16.0.1"
+
+
+# ---------- temporal tools ----------
+def test_burst_profile_finds_the_scan(mini_db):
+    o = run(mini_db, "burst_profile", {"bin_seconds": 10}).output
+    assert o["peak_flows_per_bin"] >= 33
+    assert o["peak_bin_start"].startswith("2017-07-07 14:20")
+    assert o["peak_to_median_ratio"] > 10
+
+
+def test_beacon_periodicity_ssh_is_regular(mini_db):
+    o = run(mini_db, "beacon_periodicity",
+            {"src_ip": "172.16.0.1", "dst_ip": "192.168.10.50", "dst_port": 22},
+            start="2017-07-07 14:39:00", end="2017-07-07 14:46:00").output
+    assert o["n_flows"] == 60
+    assert o["mean_gap_s"] == pytest.approx(5.0, abs=1e-3)
+    assert o["cv"] < 0.01
+    sparse = run(mini_db, "beacon_periodicity", {"src_ip": "9.9.9.9", "dst_ip": "8.8.8.8"}).output
+    assert "note" in sparse
+
+
+def test_interarrival_stats(mini_db):
+    o = run(mini_db, "interarrival_stats", {"host": "192.168.10.50"},
+            start="2017-07-07 14:39:00", end="2017-07-07 14:46:00").output
+    assert o["n_gaps"] == 59
+    assert o["median_gap_s"] == pytest.approx(5.0, abs=1e-3)
+    assert o["median_flow_iat_mean_us"] == 100000
+
+
+def test_compare_to_host_baseline(mini_db):
+    o = run(mini_db, "compare_to_host_baseline", {"host": "192.168.10.50", "baseline_minutes": 60},
+            start="2017-07-07 14:40:00", end="2017-07-07 14:46:00").output
+    assert o["window"]["n_flows"] == 60 and o["baseline"]["n_flows"] == 100
+    assert o["ratios_window_over_baseline"]["flows_per_min"] == pytest.approx(6.0, abs=0.05)
+    o = run(mini_db, "compare_to_host_baseline", {"host": "192.168.10.50"}).output  # nothing before 14:00
+    assert o["baseline"]["n_flows"] == 0 and o["ratios_window_over_baseline"] is None and o["note"]
+
+
+# ---------- all tools: registration + no label leakage in outputs ----------
+ALL_CALLS = [
+    ("case_overview", {}), ("top_talkers", {"by": "pair"}), ("host_summary", {"host": "192.168.10.50"}),
+    ("port_profile", {"host": "192.168.10.50"}), ("flow_size_distribution", {}),
+    ("flag_counts", {}), ("syn_ack_ratio", {}), ("failed_connection_rate", {}), ("rst_profile", {}),
+    ("short_flow_fraction", {}), ("burst_profile", {}),
+    ("beacon_periodicity", {"src_ip": "172.16.0.1", "dst_ip": "192.168.10.50"}),
+    ("interarrival_stats", {}), ("compare_to_host_baseline", {"host": "192.168.10.50"}),
+]
+
+
+def test_all_14_tools_registered():
+    import flowadj.tools  # noqa: F401
+    assert len(registry.names()) == 14
+    assert {n for n, _ in ALL_CALLS} == set(registry.names())
+
+
+@pytest.mark.parametrize("name,args", ALL_CALLS)
+def test_tool_output_has_no_label_words(mini_db, name, args):
+    r = run(mini_db, name, args)
+    assert r.ok, r.output
+    text = json.dumps(r.output).lower()
+    for w in ("patator", "portscan", "ssh_bruteforce", "benign", "label", "family", "attempted"):
+        assert w not in text
