@@ -31,6 +31,7 @@ def burst_profile(ctx: ToolContext, host: str | None = None, bin_seconds: int = 
     counts = df["n"].to_numpy()
     padded = np.concatenate([counts, np.zeros(max(0, n_bins - len(counts)))])
     med = float(np.median(padded))
+    act_med = float(np.median(counts))
     peak_i = int(np.argmax(counts))
     start = lambda v: clean(pd.Timestamp(int(v) * b, unit="s")) # noqa: E731
     top = df.sort_values(["n", "bin"], ascending=[False, True]).head(5)
@@ -40,6 +41,7 @@ def burst_profile(ctx: ToolContext, host: str | None = None, bin_seconds: int = 
         "median_flows_per_bin": med, "peak_flows_per_bin": int(counts[peak_i]),
         "peak_bin_start": start(df["bin"].iloc[peak_i]),
         "peak_to_median_ratio": round(float(counts[peak_i]) / med, 2) if med > 0 else None,
+        "peak_to_median_active_ratio": round(float(counts[peak_i]) / act_med, 2) if act_med > 0 else None,
         "first_active_bin": start(df["bin"].iloc[0]), "last_active_bin": start(df["bin"].iloc[-1]),
         "busiest_bins": [{"start": start(r.bin), "n_flows": int(r.n)} for r in top.itertuples()],
     }
