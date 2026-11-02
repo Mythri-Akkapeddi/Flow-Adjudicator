@@ -131,7 +131,7 @@ def test_burst_profile_finds_the_scan(mini_db):
     o = run(mini_db, "burst_profile", {"bin_seconds": 10}).output
     assert o["peak_flows_per_bin"] >= 33
     assert o["peak_bin_start"].startswith("2017-07-07 14:20")
-    assert o["peak_to_median_ratio"] > 10
+    assert o["peak_to_median_active_ratio"] > 10
 
 
 def test_beacon_periodicity_ssh_is_regular(mini_db):
