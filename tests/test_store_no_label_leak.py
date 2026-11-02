@@ -1,4 +1,5 @@
 import pytest
+import pandas as pd
 
 from flowadj.data.store import agent_columns, agent_query, eval_columns, eval_query
 
@@ -46,7 +47,9 @@ def test_select_star_has_no_label_columns(mini_db):
 
 def test_no_attack_words_in_string_values(mini_db):
     df = agent_query("SELECT * FROM flows_agent", db_path=mini_db)
-    for col in df.select_dtypes(include="object").columns:
+    text_cols = [c for c in df.columns 
+                 if not pd.api.types.is_numeric_dtype(df[c]) and not pd.api.types.is_datetime64_any_dtype(df[c])]
+    for col in text_cols:
         joined = " ".join(df[col].astype(str).unique()).lower()
         assert not any(w in joined for w in ATTACK_WORDS), f"{col} leaks an attack word"
 
